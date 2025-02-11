@@ -18,12 +18,15 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          TodosCubit(todosApi: todosApi)..getAllTodos(),
-      child: const MaterialApp(
+      create: (context) => TodosCubit(todosApi: todosApi)..getAllTodos(),
+      child:  MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'TodosApp',
-        home: TodosPage(),
+        
+        theme: ThemeData(
+        scaffoldBackgroundColor:  Colors.black, 
+      ),
+      home: const TodosPage(),
       ),
     );
   }
