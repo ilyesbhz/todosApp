@@ -165,9 +165,9 @@ class _TodosPageState extends State<TodosPage> {
               child: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home, color: Colors.white),
+                  Icon(Icons.home, color: Colors.blue),
                   Text("Index",
-                      style: TextStyle(fontSize: 10, color: Colors.white)),
+                      style: TextStyle(fontSize: 10, color: Colors.blue)),
                 ],
               ),
             ),
@@ -182,7 +182,7 @@ class _TodosPageState extends State<TodosPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.task, color: Colors.white),
-                  Text("TasksDone",
+                  Text("Tasks Done",
                       style: TextStyle(fontSize: 10, color: Colors.white)),
                 ],
               ),

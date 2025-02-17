@@ -15,6 +15,7 @@ class DonePage extends StatefulWidget {
 class _DonePageState extends State<DonePage> {
   String searchQuery = "";
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,6 +125,7 @@ class _DonePageState extends State<DonePage> {
           children: [
             TextButton(
               onPressed: () {
+                
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const TodosPage()),
@@ -132,7 +134,7 @@ class _DonePageState extends State<DonePage> {
               child: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home, color: Colors.white),
+                  Icon(Icons.home, color:Colors.white),
                   Text("Index",
                       style: TextStyle(fontSize: 10, color: Colors.white)),
                 ],
@@ -140,6 +142,7 @@ class _DonePageState extends State<DonePage> {
             ),
             TextButton(
               onPressed: () {
+            
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const DonePage()),
@@ -148,9 +151,9 @@ class _DonePageState extends State<DonePage> {
               child: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.task, color: Colors.white),
+                  Icon(Icons.task, color:  Colors.blue),
                   Text("Tasks Done",
-                      style: TextStyle(fontSize: 10, color: Colors.white)),
+                      style: TextStyle(fontSize: 10, color:  Colors.blue)),
                 ],
               ),
             ),
