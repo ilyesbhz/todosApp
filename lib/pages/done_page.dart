@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todos_app/cubit/todos_cubit.dart';
 import 'package:todos_app/models/todo.dart';
-import 'package:todos_app/pages/done_page.dart';
+import 'package:todos_app/pages/todos_page.dart';
 
-class TodosPage extends StatefulWidget {
-  const TodosPage({super.key});
+class DonePage extends StatefulWidget {
+  final int? latestCompletedTaskId;
+  const DonePage({super.key, this.latestCompletedTaskId});
 
   @override
-  _TodosPageState createState() => _TodosPageState();
+  _DonePageState createState() => _DonePageState();
 }
 
-class _TodosPageState extends State<TodosPage> {
-  String selectedFilter = "InQueue";
+class _DonePageState extends State<DonePage> {
   String searchQuery = "";
 
   @override
@@ -23,7 +23,7 @@ class _TodosPageState extends State<TodosPage> {
         backgroundColor: const Color.fromARGB(18, 18, 18, 1),
         title: const Center(
           child: Text(
-            'Index',
+            'Tasks Done',
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -43,74 +43,23 @@ class _TodosPageState extends State<TodosPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value.toLowerCase();
-                    });
-                  },
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search, color: Colors.white),
-                    hintText: "Search for your task...",
-                    hintStyle: const TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xFF363636),
-                  ),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search, color: Colors.white),
+                hintText: "Search for your task...",
+                hintStyle: const TextStyle(color: Colors.white),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF363636),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(width: 6),
-                      Text(
-                        selectedFilter,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 14),
-                      ),
-                      const SizedBox(width: 6),
-                      PopupMenuButton<String>(
-                        icon: const Icon(
-                          Icons.arrow_drop_down_sharp,
-                          color: Colors.white,
-                        ),
-                        color: const Color(0xFF363636),
-                        onSelected: (value) {
-                          setState(() {
-                            selectedFilter = value;
-                          });
-                        },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(
-                              value: "InQueue",
-                              child: Text(
-                                "In Queue",
-                                style: TextStyle(color: Colors.white),
-                              )),
-                          PopupMenuItem(
-                              value: "Completed",
-                              child: Text(
-                                "Completed",
-                                style: TextStyle(color: Colors.white),
-                              )),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                filled: true,
+                fillColor: const Color(0xFF363636),
+              ),
             ),
           ),
           Expanded(
@@ -119,16 +68,21 @@ class _TodosPageState extends State<TodosPage> {
                 if (todos.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                List<Todo> filteredTodos = todos.where((todo) {
-                  bool matchesFilter = selectedFilter == "InQueue"
-                      ? !todo.completed
-                      : selectedFilter == "Completed"
-                          ? todo.completed
-                          : true;
-                  bool matchesSearch =
-                      todo.title.toLowerCase().contains(searchQuery);
-                  return matchesFilter && matchesSearch;
+
+                List<Todo> completedTodos =
+                    todos.where((todo) => todo.completed).toList();
+
+                Todo? latestCompletedTask = completedTodos.isNotEmpty
+                    ? completedTodos.firstWhere(
+                        (todo) => todo.id == widget.latestCompletedTaskId,
+                        orElse: () => completedTodos.first,
+                      )
+                    : null;
+
+                List<Todo> filteredTodos = completedTodos.where((todo) {
+                  return todo.title.toLowerCase().contains(searchQuery);
                 }).toList();
+
                 return filteredTodos.isEmpty
                     ? const Center(
                         child: Text(
@@ -140,7 +94,20 @@ class _TodosPageState extends State<TodosPage> {
                         itemCount: filteredTodos.length,
                         itemBuilder: (context, index) {
                           final todo = filteredTodos[index];
-                          return TaskItem(todo);
+
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                            decoration: BoxDecoration(
+                              color: todo.id == widget.latestCompletedTaskId
+                                  ? Colors.blue.withOpacity(0.3)
+                                  : Colors.transparent,
+                              border: todo.id == widget.latestCompletedTaskId
+                                  ? Border.all(color: Colors.blue, width: 2)
+                                  : null,
+                            ),
+                            child: TaskItem(todo),
+                          );
                         },
                       );
               },
@@ -182,7 +149,7 @@ class _TodosPageState extends State<TodosPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.task, color: Colors.white),
-                  Text("TasksDone",
+                  Text("Tasks Done",
                       style: TextStyle(fontSize: 10, color: Colors.white)),
                 ],
               ),
@@ -245,28 +212,16 @@ class TaskItem extends StatelessWidget {
               child: ListTile(
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: GestureDetector(
-                  onTap: () {
-                    context.read<TodosCubit>().toggleTodoCompletion(todo.id);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              DonePage(latestCompletedTaskId: todo.id)),
-                    );
-                  },
-                  child: Icon(
-                    todo.completed ? Icons.check_circle : Icons.circle_outlined,
-                    color: todo.completed ? Colors.green : Colors.white70,
-                  ),
+                leading: const Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
                 ),
                 title: Text(
                   todo.title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.normal,
                     color: Colors.white,
-                    decoration:
-                        todo.completed ? TextDecoration.lineThrough : null,
+                    decoration: TextDecoration.lineThrough,
                   ),
                 ),
                 subtitle: Text(
@@ -277,35 +232,6 @@ class TaskItem extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            bottom: 12,
-            right: 16,
-            child: Wrap(
-              spacing: 8,
-              children: [
-                _buildLabel(Icons.category, "Category", Colors.blue),
-                _buildLabel(Icons.flag, "Priority", Colors.grey[850]!),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLabel(IconData icon, String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 18),
-          const SizedBox(width: 4),
-          Text(text, style: const TextStyle(color: Colors.white)),
         ],
       ),
     );
