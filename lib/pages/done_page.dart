@@ -14,7 +14,19 @@ class DonePage extends StatefulWidget {
 
 class _DonePageState extends State<DonePage> {
   String searchQuery = "";
+  int? animatedTaskId;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.latestCompletedTaskId != null) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        setState(() {
+          animatedTaskId = widget.latestCompletedTaskId;
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +85,6 @@ class _DonePageState extends State<DonePage> {
                 List<Todo> completedTodos =
                     todos.where((todo) => todo.completed).toList();
 
-                Todo? latestCompletedTask = completedTodos.isNotEmpty
-                    ? completedTodos.firstWhere(
-                        (todo) => todo.id == widget.latestCompletedTaskId,
-                        orElse: () => completedTodos.first,
-                      )
-                    : null;
-
                 List<Todo> filteredTodos = completedTodos.where((todo) {
                   return todo.title.toLowerCase().contains(searchQuery);
                 }).toList();
@@ -98,13 +103,13 @@ class _DonePageState extends State<DonePage> {
 
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
+                            curve: Curves.easeOut,
                             decoration: BoxDecoration(
-                              color: todo.id == widget.latestCompletedTaskId
-                                  ? Colors.blue.withOpacity(0.3)
+                              color: todo.id == animatedTaskId
+                                  ? Colors.blue.withOpacity(0.2)
                                   : Colors.transparent,
-                              border: todo.id == widget.latestCompletedTaskId
-                                  ? Border.all(color: Colors.blue, width: 2)
+                              border: todo.id == animatedTaskId
+                                  ? Border.all(color: Colors.blue, width: 1)
                                   : null,
                             ),
                             child: TaskItem(todo),
@@ -125,7 +130,6 @@ class _DonePageState extends State<DonePage> {
           children: [
             TextButton(
               onPressed: () {
-                
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const TodosPage()),
@@ -134,7 +138,7 @@ class _DonePageState extends State<DonePage> {
               child: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home, color:Colors.white),
+                  Icon(Icons.home, color: Colors.white),
                   Text("Index",
                       style: TextStyle(fontSize: 10, color: Colors.white)),
                 ],
@@ -142,7 +146,6 @@ class _DonePageState extends State<DonePage> {
             ),
             TextButton(
               onPressed: () {
-            
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const DonePage()),
@@ -151,9 +154,9 @@ class _DonePageState extends State<DonePage> {
               child: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.task, color:  Colors.blue),
+                  Icon(Icons.task, color: Colors.blue),
                   Text("Tasks Done",
-                      style: TextStyle(fontSize: 10, color:  Colors.blue)),
+                      style: TextStyle(fontSize: 10, color: Colors.blue)),
                 ],
               ),
             ),
